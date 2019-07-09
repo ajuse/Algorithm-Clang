@@ -9,34 +9,6 @@ typedef struct stAry{
 	int aryUsed;
 }stAry;
 
-int add_ary(stAry *stArray, int elm)
-{
-	if (stArray == NULL || stArray->pAry == NULL)
-		return -1;
-
-	if (stArray->aryUsed < stArray->arySize - 1)
-	{
-		stArray->pAry[stArray->aryUsed] = elm;
-		stArray->aryUsed += 1;
-		return 0;
-	}
-	else
-	{
-		int *pNewAry = (int *)malloc(2 * stArray->arySize * sizeof(int));
-		
-		if (pNewAry == NULL)
-			return -1;
-
-		memcpy(pNewAry, stArray->pAry, stArray->arySize * sizeof(int));
-		stArray->pAry = pNewAry;
-		stArray->arySize = 2 * stArray->arySize;
-
-		stArray->pAry[stArray->aryUsed] = elm;
-		stArray->aryUsed += 1;
-
-		return 0;
-	}
-}		
 
 int del_ary(stAry *stArray, unsigned int idx)
 {
@@ -49,23 +21,44 @@ int del_ary(stAry *stArray, unsigned int idx)
 	return 0;
 }
 
+int add_ordered_ary(stAry *stArray, int elm)
+{
+	int i = 0;
+
+	if (stArray == NULL || stArray->aryUsed >= stArray->arySize)
+		return -1;
+
+	// find index of elm
+	for (i = 0; i < stArray->aryUsed; i++)
+		if (stArray->pAry[i] > elm)
+			break;
+
+	if (i < stArray->aryUsed)
+		memmove(&stArray->pAry[i + 1], &stArray->pAry[i], (stArray->aryUsed - i) * sizeof(int));
+
+	stArray->pAry[i] = elm;
+	stArray->aryUsed += 1;
+
+	return 0;
+}
+
 int main()
 {
 	int testAry[] = {1,2,3,4,5,6,7,8,9,8,7,6,5,5,4,3,2,2,1,6,7,85,3,2};
 	int i = 0;
 	int testAryLen = sizeof(testAry) / sizeof(int);
-	stAry stArray = {5, NULL, 0};
+	stAry stArray = {40, NULL, 0};
 
 	stArray.pAry = (int *)malloc(stArray.arySize * sizeof(int));
 
 	if (stArray.pAry == NULL)
 		return -1;
 
+	memset(stArray.pAry, 0, stArray.arySize * sizeof(int));
+
 	for (i = 0; i < testAryLen; i++)
-	{
-		if (0 != add_ary(&stArray, testAry[i]))
+		if (0 != add_ordered_ary(&stArray, testAry[i]))
 			return -1;
-	}
 
 	for (i = 0; i < stArray.aryUsed; i++)
 		printf("%d ", stArray.pAry[i]);
